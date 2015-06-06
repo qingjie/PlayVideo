@@ -48,6 +48,11 @@ class ViewController: UIViewController {
         if let player = moviePlayer{
             /*Listen for the notification that the movie player sends us whenever it finishes playing*/
             NSNotificationCenter.defaultCenter().addObserver(self, selector: "videoHasFinishedPlaying:", name: MPMoviePlayerPlaybackDidFinishNotification, object: nil)
+            
+           
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: "videoThumbnailIsAvailable:", name: MPMoviePlayerThumbnailImageRequestDidFinishNotification, object: nil)
+            
+            
             println("Successfully instantiated the movie player")
             /*Scale the movie player to fit the aspect ratio*/
             player.scalingMode = .AspectFit
@@ -57,6 +62,11 @@ class ViewController: UIViewController {
             
             /*Let's start playing the video in full screen mode*/
             player.play()
+            
+            /*capture the frame at the six second into to movie */
+            let sixSecondThumbnial = 6.0
+            
+            player.requestThumbnailImagesAtTimes([sixSecondThumbnial], timeOption: .NearestKeyFrame)
             
             
         }else{
@@ -100,7 +110,26 @@ class ViewController: UIViewController {
         }
     }
     
-  
+    func videoThumbnailIsAvailable(notification:NSNotification){
+        if let player = moviePlayer {
+            println("Thumbnail is available")
+            
+            /*Now get the thumbnail out of the use info dictionary */
+            let thumbnail = notification.userInfo![MPMoviePlayerThumbnailImageKey] as? UIImage
+            if let image = thumbnail{
+                /* we got thumbnail image, you can use it here */
+                println("Thumbnail image is = \(image)")
+                var img = image
+                let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
+                println(documentsPath)
+                
+                let destinationPath = documentsPath.stringByAppendingPathComponent("thumbnail.jpg")
+                println(destinationPath)
+                UIImageJPEGRepresentation(img,1.0).writeToFile(destinationPath, atomically: true)
+                println(destinationPath)
+            }
+        }
+    }
    
 
 }
